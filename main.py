@@ -1,5 +1,5 @@
 # Felix Kleindienst
-# Pascal Schadei
+# Pascal Schadei 224200286
 # Pauline Klingner
 # Robin Schneider
 # Theo Fischer 224200585
@@ -33,6 +33,24 @@ def distance(obj: typing.Dict, head: typing.Dict) -> int:
     distance calculates the distance from the head to an object using the Manhattan distance formula
     '''
     return abs(obj["x"] - head["x"]) + abs(obj["y"] - head["y"])
+
+def food_advantage(small_game_state: typing.Dict) -> typing.Dict:
+    '''
+    food_advantage returns a rating of the food spots how likely they are reachable against other snakes
+    '''
+    advantage = {f : 0 for f in small_game_state['board']['food']}
+    for food in small_game_state['board']['food']:
+        advantage[food] += distance(food, small_game_state['you']['head'])
+        # calculate disadvantage against every enemy snake
+        for snake in small_game_state['board']['snakes']:
+            if distance(food, snake['head']) <= distance(food, small_game_state['you']['head']):
+                advantage[food] -=  distance(food, snake['head']) - distance(food, small_game_state['you']['head'])
+            else:
+                advantage[food] -= distance(food, snake['head']) - distance(food, small_game_state['you']['head'])
+    # low advantage score is good
+    advantage = dict(sorted(advantage.items(), key=lambda item: item[1]))
+
+    return  dict(advantage.keys())
 
 
 def predict_game_state(small_game_state: typing.Dict, recursion_depth: int) -> typing.Tuple[int, int, int]:
